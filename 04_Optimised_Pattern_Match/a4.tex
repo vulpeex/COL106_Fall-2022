@@ -1,0 +1,73 @@
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{fancyhdr}  % Package for custom headers and footers
+\usepackage[a4paper, margin=0.9in, ]{geometry}  % Adjust margins here
+\pagestyle{fancy}  % Activate fancy page style
+\fancyhf{}  % Clear default header and footer
+% Customize header
+\fancyhead[L]{COL106\vspace{5pt}\\Release Date: 2022/10/14}  % Left side header
+\fancyhead[R]{Assignment 4\vspace{5pt}\\Deadline: 2022/10/28 23:00}  % Right side header
+% Customize footer
+\fancyfoot[C]{\thepage}  % Center footer (page number)
+\begin{document}
+\section*{1. Background}
+Consider the basic pattern matching problem discussed in class: given a string $p$ of length $m$ (a.k.a. the pattern) and a string $x$ of length $n$ (a.k.a the document), the task is to find all occurrences of $p$ in $x$. Assume $m \leq n$. We saw in class that a naïve algorithm for this takes $O(mn)$ time, whereas the smarter Knuth-Morris-Pratt algorithm does the job in $O(m + n)$ time. Throughout this document, if $y$ is a string, then we denote by $y[i..j]$ the substring of $y$ starting at index $i$ and ending at index $j$. Recall that the Knuth-Morris-Pratt algorithm computes the failure function $h: \{1, \dots, m\} \to \{1, \dots, m\}$ associated with the pattern $p$, where $h(i)$ is the length of the longest proper prefix of $p[1..i]$ that is also a suffix of $p[1..i]$. This function is then used to process the document. Thus, the function $h$ remains in the working memory, occupying $\Theta(m \log m)$ bits of space. Another $\Theta(\log n)$ bits of space is needed to store the current index while scanning the document, bringing the overall space complexity to $\Theta(m \log m + \log n)$. The $\log n$ term is unavoidable because we have to store at least a constant number of indices, but can we cut down the $m \log m$ term?
+
+Our task for this assignment is to design and implement an algorithm that has about the same time complexity as Knuth-Morris-Pratt, but uses only $O(\log m + \log n)$ working memory. Of course, this comes at a cost: the algorithm does report false positives with a tiny probability $\epsilon$.
+
+\section*{2. The Basic Idea}
+For the purpose of this assignment, assume that the document $x$ is a string over the uppercase Latin alphabet: $\{A, B, \dots, Z\}$. Identify these characters with numbers as follows: $A$ with $0$, $B$ with $1$, \dots, $Z$ with $25$. A string $y = y[0]y[1]\cdots y[n-1]$ over the set $\{A, B, \dots, Z\}$ of length $n$ is the 26-ary representation of the number
+
+\[
+f(y) = \sum_{i=0}^{n-1} 26^{n-i-1} \times y[i]
+\]
+
+(i.e. $y[0]$ is the most significant and $y[n-1]$ is the least significant), and the function $f$ is a bijection between strings and non-negative integers. The task of finding occurrences of $p$ in a document $x$ is the same as finding all indices $i$ such that $f(x[i..(i+m-1)]) = f(p)$. This observation does give a correct algorithm, but how better is it than the naïve and the Knuth-Morris-Pratt algorithms? Apart from the current index, we need to store the number $f(p)$ in our working memory, and this takes about $\log n + \log_2 26^m$ space, which is $\Theta(m + \log n)$ – not significantly better than Knuth-Morris-Pratt. For each $i$, computing $f(x[i..(i+m-1)])$ takes time $\Omega(m)$. Thus, the running time is $\Omega(mn)$ – no better than the naïve algorithm. We definitely need more ideas!
+
+To get around the problem of $\Omega(m + \log n)$ space, we choose an appropriate prime number $q$, and store $f(p) \mod q$ in our working memory instead of $f(p)$. Only $O(\log q)$ bits of working memory are sufficient for this. Then for each $i$, we compute $f(x[i..(i+m-1)]) \mod q$, and report a match if and only if it equals $f(p) \mod q$. This does introduce false positives, and we will see how to control the error probability by choosing $q$ carefully.
+
+\section*{3. Controlling Error}
+How should we choose the prime number $q$ for \texttt{modPatternMatch(q,p,x)} so that we don’t report too many false positives? Clearly, choosing $q$ deterministically is not a good idea. A worst-case instance could have lots of occurrences of a pattern $p' \neq p$ such that $(f(p') \mod q) = (f(p) \mod q)$. To get around this, we choose $q$ to be a uniformly random prime which is at most an appropriately chosen number $N$. The number $N$ will depend on $m$, the length of the pattern, and $\epsilon$, the upper bound on the error probability.
+
+\section*{4. Wildcards}
+Next, let us be a bit more ambitious. Suppose now that pattern $p$ is a string over the set $\{A,B, \dots,Z\} \cup \{?\}$, where ‘?’ is a wildcard character, and $p$ contains exactly one occurrence of the wildcard. The document $x$ is still a string over $\{A,B, \dots,Z\}$. We say that the pattern $p$ matches the document $x$ at index $i$ if for all $j \in \{0, \dots, m-1\}$: $p[j] = x[i+j]$ or $p[j] = `?'$.
+
+\section*{5. A Word of Caution}
+Strings are immutable. If you somehow attempt to use the space in the given input string for your computation (e.g., by creating a list of characters from it), you are using as much working memory as the length of the string. This is obviously unacceptable given our space constraints.
+
+\section*{6. Submission Specifications}
+You are given a file named \texttt{a4.py}. The file contains the following functions:
+\begin{enumerate}
+    \item \texttt{randPrime(N)}: returns a random prime number less than or equal to $N$.
+    \item \texttt{findN(eps, m)}: returns an appropriate $N$ based on pattern length $m$ and error bound $\epsilon$.
+    \item \texttt{randPatternMatch(eps,p,x)}: fully implemented but requires functions \texttt{findN} and \texttt{modPatternMatch}.
+    \item \texttt{modPatternMatch(q,p,x)}: returns a sorted list of indices $i$ such that $(f(x[i..(i+m-1)]) \mod q) = (f(p) \mod q)$.
+\end{enumerate}
+
+\section*{7. Evaluation}
+We will be using both auto-grading and manual grading to assess the correctness of your code. Write clean and self-explanatory code, with comments wherever necessary. You may be called for a viva on a case-by-case basis.
+
+\section*{8. Example Test Cases}
+\begin{verbatim}
+>>> modPatternMatch(1000000007, 'CD', 'ABCDE')
+[2]
+
+>>> modPatternMatch(1000000007, 'AA', 'AAAAA')
+[0, 1, 2, 3]
+
+>>> modPatternMatchWildcard(1000000007, 'D?', 'ABCDE')
+[3]
+
+>>> modPatternMatch(2, 'AA', 'ACEGI')
+[0, 1, 2, 3]
+
+>>> modPatternMatchWildcard(1000000007, '?A', 'ABCDE')
+[]
+\end{verbatim}
+
+
+
+\thispagestyle{plain}
+\end{document}

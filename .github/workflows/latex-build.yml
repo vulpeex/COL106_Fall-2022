@@ -1,0 +1,49 @@
+name: LaTeX build
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Compile a1.tex
+        run: |
+          sudo apt-get update
+          sudo apt-get install texlive-latex-base texlive-latex-extra texlive-fonts-recommended texlive-fonts-extra texlive-xetex
+          pdflatex ./01_DroneSurveillance/a1.tex
+
+      - name: Compile a2.tex
+        run: |
+          pdflatex ./02_ListCollisions/a2.tex
+          
+      - name: Compile a3.tex
+        run: |
+          pdflatex ./03_Search_Nearby/a3.tex
+
+      - name: Compile a4.tex
+        run: |
+          pdflatex ./04_Optimised_Pattern_Match/a4.tex
+
+      - name: Compile a5.tex
+        run: |
+          pdflatex ./05_Network-Channel-Capacity/a5.tex
+
+      - name: Upload PDFs
+        uses: actions/upload-artifact@v2
+        with:
+          name: compiled-pdfs
+          path: |
+            ./01_DroneSurveillance/a1.pdf
+            ./02_ListCollisions/a2.pdf
+            ./03_Search_Nearby/a3.pdf
+            ./04_Optimised_Pattern_Match/a4.pdf
+            ./05_Network-Channel-Capacity/a5.pdf
