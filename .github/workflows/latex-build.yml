@@ -20,28 +20,53 @@ jobs:
           sudo apt-get update
           sudo apt-get install texlive-latex-base texlive-latex-extra texlive-fonts-recommended texlive-fonts-extra texlive-xetex
 
+      - name: Set working directory for LaTeX files
+        run: cd ./01_DroneSurveillance
+        shell: bash
+
       - name: Compile a1.tex
-        run: pdflatex ./01_DroneSurveillance/a1.tex
+        run: pdflatex a1.tex
+        shell: bash
+
+      - name: Set working directory for ListCollisions
+        run: cd ../02_ListCollisions
+        shell: bash
 
       - name: Compile a2.tex
-        run: pdflatex ./02_ListCollisions/a2.tex
+        run: pdflatex a2.tex
+        shell: bash
+
+      - name: Set working directory for Search_Nearby
+        run: cd ../03_Search_Nearby
+        shell: bash
 
       - name: Compile a3.tex
-        run: pdflatex ./03_Search_Nearby/a3.tex
+        run: pdflatex a3.tex
+        shell: bash
+
+      - name: Set working directory for Optimised_Pattern_Match
+        run: cd ../04_Optimised_Pattern_Match
+        shell: bash
 
       - name: Compile a4.tex
-        run: pdflatex ./04_Optimised_Pattern_Match/a4.tex
+        run: pdflatex a4.tex
+        shell: bash
+
+      - name: Set working directory for Network-Channel-Capacity
+        run: cd ../05_Network-Channel-Capacity
+        shell: bash
 
       - name: Compile a5.tex
-        run: pdflatex ./05_Network-Channel-Capacity/a5.tex
+        run: pdflatex a5.tex
+        shell: bash
 
       - name: Upload PDFs
         uses: actions/upload-artifact@v3
         with:
           name: compiled-pdfs
           path: |
-            ./01_DroneSurveillance/a1.pdf
-            ./02_ListCollisions/a2.pdf
-            ./03_Search_Nearby/a3.pdf
-            ./04_Optimised_Pattern_Match/a4.pdf
-            ./05_Network-Channel-Capacity/a5.pdf
+            ../01_DroneSurveillance/a1.pdf
+            ../02_ListCollisions/a2.pdf
+            ../03_Search_Nearby/a3.pdf
+            ../04_Optimised_Pattern_Match/a4.pdf
+            ../05_Network-Channel-Capacity/a5.pdf
