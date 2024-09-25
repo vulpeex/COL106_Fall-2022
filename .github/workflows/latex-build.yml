@@ -13,32 +13,30 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v2
 
-      - name: Compile a1.tex
+      - name: Install TeX Live
         run: |
           sudo apt-get update
           sudo apt-get install texlive-latex-base texlive-latex-extra texlive-fonts-recommended texlive-fonts-extra texlive-xetex
-          pdflatex ./01_DroneSurveillance/a1.tex
+
+      - name: Compile a1.tex
+        run: pdflatex ./01_DroneSurveillance/a1.tex
 
       - name: Compile a2.tex
-        run: |
-          pdflatex ./02_ListCollisions/a2.tex
-          
+        run: pdflatex ./02_ListCollisions/a2.tex
+
       - name: Compile a3.tex
-        run: |
-          pdflatex ./03_Search_Nearby/a3.tex
+        run: pdflatex ./03_Search_Nearby/a3.tex
 
       - name: Compile a4.tex
-        run: |
-          pdflatex ./04_Optimised_Pattern_Match/a4.tex
+        run: pdflatex ./04_Optimised_Pattern_Match/a4.tex
 
       - name: Compile a5.tex
-        run: |
-          pdflatex ./05_Network-Channel-Capacity/a5.tex
+        run: pdflatex ./05_Network-Channel-Capacity/a5.tex
 
       - name: Upload PDFs
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: compiled-pdfs
           path: |
